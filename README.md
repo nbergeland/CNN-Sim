@@ -139,7 +139,7 @@ plt.grid(True)
 
 plt.tight_layout()
 plt.show()
-
+![Plotly Visualization: Simulated Regression](CNN.png)
 # Simple inference function
 def predict(model, image_tensor):
     model.eval()
