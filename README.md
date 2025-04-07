@@ -139,7 +139,7 @@ plt.grid(True)
 
 plt.tight_layout()
 plt.show()
-![Plotly Visualization: Simulated Regression](CNN.png)
+
 # Simple inference function
 def predict(model, image_tensor):
     model.eval()
@@ -154,3 +154,5 @@ def predict(model, image_tensor):
 test_image = torch.randn(3, 64, 64)
 prediction = predict(model, test_image)
 print(f"Prediction for test image: {prediction}")
+
+![Plotly Visualization: Simulated Regression](CNN.png)
