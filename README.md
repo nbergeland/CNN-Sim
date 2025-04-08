@@ -2,40 +2,40 @@
 Use images to detect damaged products vs. undamaged products in a manufacturing or fulfillment center context.
 
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import matplotlib.pyplot as plt
-from torch.utils.data import TensorDataset, DataLoader
-import numpy as np
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    import matplotlib.pyplot as plt
+    from torch.utils.data import TensorDataset, DataLoader
+    import numpy as np
 
-#Create synthetic dataset for binary classification (simulating damaged/undamaged)
-def create_synthetic_data(num_samples=1000, input_size=64):
-    # Create feature tensors (simulating images)
-    X = torch.randn(num_samples, 3, input_size, input_size)
+    #Create synthetic dataset for binary classification (simulating damaged/undamaged)
+    def create_synthetic_data(num_samples=1000, input_size=64):
+        # Create feature tensors (simulating images)
+        X = torch.randn(num_samples, 3, input_size, input_size)
     
     # Create labels: 0 for undamaged, 1 for damaged
     y = torch.randint(0, 2, (num_samples,))
     
     return X, y
 
-#Generate data
-train_X, train_y = create_synthetic_data(1000)
-val_X, val_y = create_synthetic_data(200)
-
-#Create datasets and loaders
-train_dataset = TensorDataset(train_X, train_y)
-val_dataset = TensorDataset(val_X, val_y)
-
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=16)
-
-#CNN Model Definition
-class DamageClassifier(nn.Module):
-    def __init__(self):
-        super(DamageClassifier, self).__init__()
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
+    #Generate data
+    train_X, train_y = create_synthetic_data(1000)
+    val_X, val_y = create_synthetic_data(200)
+    
+    #Create datasets and loaders
+    train_dataset = TensorDataset(train_X, train_y)
+    val_dataset = TensorDataset(val_X, val_y)
+    
+    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=16)
+    
+    #CNN Model Definition
+    class DamageClassifier(nn.Module):
+        def __init__(self):
+            super(DamageClassifier, self).__init__()
+            self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1)
+            self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
         
         # Calculate output size after convolutions and pooling
         # With padding=1, size is maintained after conv layers
@@ -61,26 +61,26 @@ class DamageClassifier(nn.Module):
         x = self.fc2(x)
         return x
 
-#Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Using device: {device}")
-
-model = DamageClassifier().to(device)
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-#Training loop
-epochs = 5
-train_loss_history = []
-val_loss_history = []
-val_accuracy_history = []
-
-for epoch in range(epochs):
-    #Training phase
-    model.train()
-    running_loss = 0.0
-    for images, labels in train_loader:
-        images, labels = images.to(device), labels.to(device)
+    #Device configuration
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using device: {device}")
+    
+    model = DamageClassifier().to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    
+    #Training loop
+    epochs = 5
+    train_loss_history = []
+    val_loss_history = []
+    val_accuracy_history = []
+    
+    for epoch in range(epochs):
+        #Training phase
+        model.train()
+        running_loss = 0.0
+        for images, labels in train_loader:
+            images, labels = images.to(device), labels.to(device)
         
         optimizer.zero_grad()
         outputs = model(images)
@@ -118,43 +118,43 @@ for epoch in range(epochs):
     
     print(f"Epoch {epoch+1}/{epochs}, Train Loss: {epoch_loss:.4f}, Val Loss: {val_epoch_loss:.4f}, Val Accuracy: {accuracy:.2f}%")
 
-#Visualization
-plt.figure(figsize=(12, 5))
+    #Visualization
+    plt.figure(figsize=(12, 5))
+    
+    #Plot losses
+    plt.subplot(1, 2, 1)
+    plt.plot(range(1, epochs+1), train_loss_history, marker='o', label='Training Loss')
+    plt.plot(range(1, epochs+1), val_loss_history, marker='d', label='Validation Loss')
+    plt.title("CNN Training and Validation Loss")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.grid(True)
+    
+    #Plot validation accuracy
+    plt.subplot(1, 2, 2)
+    plt.plot(range(1, epochs+1), val_accuracy_history, marker='s', color='green')
+    plt.title("Validation Accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy (%)")
+    plt.grid(True)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    #Simple inference function
+    def predict(model, image_tensor):
+        model.eval()
+        with torch.no_grad():
+            image_tensor = image_tensor.unsqueeze(0).to(device)  # Add batch dimension
+            output = model(image_tensor)
+            _, predicted = torch.max(output, 1)
+            result = "Damaged" if predicted.item() == 1 else "Undamaged"
+        return result
 
-#Plot losses
-plt.subplot(1, 2, 1)
-plt.plot(range(1, epochs+1), train_loss_history, marker='o', label='Training Loss')
-plt.plot(range(1, epochs+1), val_loss_history, marker='d', label='Validation Loss')
-plt.title("CNN Training and Validation Loss")
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.legend()
-plt.grid(True)
-
-#Plot validation accuracy
-plt.subplot(1, 2, 2)
-plt.plot(range(1, epochs+1), val_accuracy_history, marker='s', color='green')
-plt.title("Validation Accuracy")
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy (%)")
-plt.grid(True)
-
-plt.tight_layout()
-plt.show()
-
-#Simple inference function
-def predict(model, image_tensor):
-    model.eval()
-    with torch.no_grad():
-        image_tensor = image_tensor.unsqueeze(0).to(device)  # Add batch dimension
-        output = model(image_tensor)
-        _, predicted = torch.max(output, 1)
-        result = "Damaged" if predicted.item() == 1 else "Undamaged"
-    return result
-
-#Test inference with a random image
-test_image = torch.randn(3, 64, 64)
-prediction = predict(model, test_image)
-print(f"Prediction for test image: {prediction}")
+    #Test inference with a random image
+    test_image = torch.randn(3, 64, 64)
+    prediction = predict(model, test_image)
+    print(f"Prediction for test image: {prediction}")
 
 ![Plotly Visualization: Simulated Regression](CNN.png)
