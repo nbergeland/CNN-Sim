@@ -1,5 +1,7 @@
 # CNN-Sim
 Use images to detect damaged products vs. undamaged products in a manufacturing or fulfillment center context.
+
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
